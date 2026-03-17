@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   createPayin,
+  getPayinDetail,
   type PayinResponse,
   type PayinCurrency,
   type PayinVndParams,
@@ -125,6 +126,7 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [payin, setPayin] = useState<PayinResponse | null>(null);
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
+  const [bankDetailsLoading, setBankDetailsLoading] = useState(false);
   const [payoutForm, setPayoutForm] = useState<PayoutFormData>(defaultPayoutForm);
   const [payoutPreview, setPayoutPreview] = useState<PayoutPayloadDisplay | null>(null);
 
@@ -155,8 +157,35 @@ function App() {
     setStep('amount');
     setPayin(null);
     setQrDataUrl(null);
+    setBankDetailsLoading(false);
     setError(null);
   };
+
+  // For bank transfer (KRW/JPY): wait 10s then fetch payin detail so bank account info is shown
+  useEffect(() => {
+    if (
+      step !== 'qr' ||
+      !payin ||
+      payinHasQr(payin) ||
+      !selectedCurrency ||
+      !['KRW', 'JPY'].includes(selectedCurrency)
+    ) {
+      return;
+    }
+    const uuid = payin.uuid;
+    const currency = selectedCurrency;
+    const t = setTimeout(async () => {
+      try {
+        const detail = await getPayinDetail(uuid, currency as PayinCurrency);
+        setPayin(detail);
+      } catch {
+        // Keep showing current payin; user can retry or back
+      } finally {
+        setBankDetailsLoading(false);
+      }
+    }, 10_000);
+    return () => clearTimeout(t);
+  }, [step, payin?.uuid, selectedCurrency]);
   const handleBackToWithdraw = () => {
     setStep('withdraw');
     setPayoutPreview(null);
@@ -219,8 +248,10 @@ function App() {
       if (payinHasQr(res)) {
         const dataUrl = await qrStringToDataUrl(res.pay_code.qr_string);
         setQrDataUrl(dataUrl);
+        setBankDetailsLoading(false);
       } else {
         setQrDataUrl(null);
+        setBankDetailsLoading(true);
       }
       setStep('qr');
     } catch (e) {
@@ -530,25 +561,40 @@ function App() {
                   <p className="subtitle">
                     Pay {formatCurrency(Number(payin.amount), selectedCurrency)} via bank transfer
                   </p>
-                  <div className="bank-details">
-                    {Object.entries(payin.pay_code)
-                      .filter(([key, value]) => key !== 'qr_string' && value != null && value !== '')
-                      .map(([key, value]) => (
-                        <div key={key} className="bank-detail-row">
-                          <span className="bank-detail-label">
-                            {key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}
-                          </span>
-                          <span className="bank-detail-value">
-                            {typeof value === 'object'
-                              ? JSON.stringify(value)
-                              : String(value)}
-                          </span>
+                  {bankDetailsLoading ? (
+                    <div className="bank-details-loading">
+                      <p>Loading bank account details…</p>
+                      <p className="bank-details-loading-hint">Please wait about 10 seconds.</p>
+                    </div>
+                  ) : (() => {
+                    const entries = Object.entries(payin.pay_code || {}).filter(
+                      ([key, value]) => key !== 'qr_string' && value != null && value !== ''
+                    );
+                    return (
+                      <>
+                        <div className="bank-details">
+                          {entries.map(([key, value]) => (
+                            <div key={key} className="bank-detail-row">
+                              <span className="bank-detail-label">
+                                {key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}
+                              </span>
+                              <span className="bank-detail-value">
+                                {typeof value === 'object'
+                                  ? JSON.stringify(value)
+                                  : String(value)}
+                              </span>
+                            </div>
+                          ))}
                         </div>
-                      ))}
-                  </div>
-                  <p className="qr-hint">
-                    Transfer the exact amount to the account above. Use the reference if required.
-                  </p>
+                        {entries.length === 0 && (
+                          <p className="qr-hint">Bank details not yet available. Please try again in a moment or go back and retry.</p>
+                        )}
+                        <p className="qr-hint">
+                          Transfer the exact amount to the account above. Use the reference if required.
+                        </p>
+                      </>
+                    );
+                  })()}
                 </>
               )}
               <div className="payin-meta">

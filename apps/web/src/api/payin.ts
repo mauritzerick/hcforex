@@ -127,7 +127,28 @@ export async function createPayin(
   return data as PayinResponse;
 }
 
-/** True if response has a QR code (IDR/VND); false if bank/VA details (KRW) */
+/** True if response has a QR code (IDR/VND); false if bank/VA details (KRW/JPY) */
 export function payinHasQr(res: PayinResponse): res is PayinResponse & { pay_code: PayCodeQR } {
   return typeof (res.pay_code as PayCodeQR).qr_string === 'string';
+}
+
+/** Fetch payin details by uuid (for bank transfer methods; details may appear after a short delay) */
+export async function getPayinDetail(
+  uuid: string,
+  currency: PayinCurrency
+): Promise<PayinResponse> {
+  const res = await fetch(
+    `${API_BASE}/api/payins/detail?uuid=${encodeURIComponent(uuid)}&currency=${encodeURIComponent(currency)}`
+  );
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const msg =
+      typeof data.error === 'string'
+        ? data.error
+        : typeof data.message === 'string'
+          ? data.message
+          : `Failed to load details: ${res.status}`;
+    throw new Error(msg);
+  }
+  return data as PayinResponse;
 }

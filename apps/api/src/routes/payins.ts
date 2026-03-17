@@ -125,3 +125,32 @@ export async function createPayin(req: Request, res: Response): Promise<void> {
     res.status(500).json({ error: message });
   }
 }
+
+export async function getPayinDetail(req: Request, res: Response): Promise<void> {
+  try {
+    const uuid = typeof req.query.uuid === 'string' ? req.query.uuid : '';
+    const currency = typeof req.query.currency === 'string' ? req.query.currency : '';
+    if (!uuid || !['IDR', 'VND', 'KRW', 'JPY'].includes(currency)) {
+      res.status(400).json({ error: 'Query params uuid and currency (IDR|VND|KRW|JPY) required' });
+      return;
+    }
+    const { appId, secretKey } = getCredentials(currency);
+    const { hellocleverBase: baseUrl } = getConfig();
+    const response = await fetch(`${baseUrl}/payins/detail?uuid=${encodeURIComponent(uuid)}`, {
+      method: 'GET',
+      headers: {
+        'app-id': appId,
+        'secret-key': secretKey,
+      },
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      res.status(response.status).json(data);
+      return;
+    }
+    res.status(200).json(data);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Failed to load payin details';
+    res.status(500).json({ error: message });
+  }
+}

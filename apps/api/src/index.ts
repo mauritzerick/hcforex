@@ -1,5 +1,5 @@
 import express from 'express';
-import { createPayin } from './routes/payins.js';
+import { createPayin, getPayinDetail } from './routes/payins.js';
 import { getConfig } from './config.js';
 
 const app = express();
@@ -47,6 +47,7 @@ app.use((req, res, next) => {
 });
 
 app.post('/api/payins', createPayin);
+app.get('/api/payins/detail', getPayinDetail);
 
 // So opening http://localhost:3001 in the browser doesn't show 404
 app.get('/', (req, res) => {
