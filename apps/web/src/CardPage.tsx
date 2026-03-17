@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import './CardPage.css';
 
+/** Production SDK (use sandbox via VITE_GETKOLLO_SDK_URL if needed) */
 const DEFAULT_SDK_URL =
-  'https://cdn.lightningpay.me/media/getkollo-sdk/1.1.0/sandbox/getkollo.js';
+  'https://cdn.lightningpay.me/media/getkollo-sdk/1.1.0/prod/getkollo.js';
 
 function loadScript(src: string): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -188,8 +189,28 @@ export function CardPage() {
           GetKollo SDK • Supported currencies: AUD &amp; USD
         </p>
         <p className="card-page-hint">
-          To test locally: (1) <strong>Ask Hello Clever to whitelist localhost</strong> (or localhost:5173) for your app_id so you can use http://localhost:5173. (2) Or use a <strong>tunnel</strong> (e.g. Cloudflare Tunnel) with a subdomain like dev.digital-core.us and ask them to allow it. See <code>apps/web/LOCAL-DOMAIN.md</code>. Enable <strong>Demo mode</strong> below to try the UI without the real SDK when you get &quot;Not Authorize&quot;.
+          Using <strong>production SDK</strong>. Set <code>VITE_GETKOLLO_SDK_URL</code> to the sandbox URL only for local/testing. Enable <strong>Demo mode</strong> to try the UI without the real SDK.
         </p>
+
+        {typeof window !== 'undefined' && (
+          <div className="card-page-domain-check">
+            <p className="card-page-domain-check-title">Domain check (for “Not Authorize”)</p>
+            <p className="card-page-domain-check-line">
+              <strong>Origin:</strong> <code>{window.location.origin}</code>
+            </p>
+            <p className="card-page-domain-check-line">
+              <strong>App ID:</strong>{' '}
+              {appId?.trim() ? (
+                <code>Set (…{appId.trim().slice(-6)})</code>
+              ) : (
+                <span className="card-page-error">Not set — add VITE_GETKOLLO_APP_ID in Vercel</span>
+              )}
+            </p>
+            <p className="card-page-hint card-page-hint-inline">
+              Hello Clever must have this <strong>exact origin</strong> registered for this app_id. If you use a Vercel <strong>preview</strong> URL (e.g. <code>hcforex-xxx-yourname.vercel.app</code>), that is a different origin — open the <strong>production</strong> URL <code>hcforex.vercel.app</code> or ask them to whitelist the preview origin too.
+            </p>
+          </div>
+        )}
 
         {!sdkLoaded && !sdkError && (
           <p className="card-page-status">Loading SDK…</p>
@@ -278,7 +299,16 @@ export function CardPage() {
             />
           </div>
 
-          {createError && <p className="error">{createError}</p>}
+          {createError && (
+            <>
+              <p className="error">{createError}</p>
+              {(createError.toLowerCase().includes('authorize') || createError.toLowerCase().includes('not authorize')) && (
+                <p className="card-page-hint card-page-hint-inline">
+                  Register this domain with Hello Clever for your GetKollo app_id: <strong>{typeof window !== 'undefined' ? window.location.origin : ''}</strong>
+                </p>
+              )}
+            </>
+          )}
           {callbackMessage && (
             <p className="card-page-callback">{callbackMessage}</p>
           )}

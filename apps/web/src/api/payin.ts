@@ -150,5 +150,7 @@ export async function getPayinDetail(
           : `Failed to load details: ${res.status}`;
     throw new Error(msg);
   }
-  return data as PayinResponse;
+  // Normalize in case backend didn't: detail API may return nested { data } or { payin }
+  const payin = (data && (data.data ?? data.payin ?? data.payin_detail)) || data;
+  return payin as PayinResponse;
 }

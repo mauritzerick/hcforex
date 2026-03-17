@@ -49,6 +49,38 @@
   border-radius: 4px;
 }
 
+.card-page-hint-inline {
+  margin-top: 0.25rem;
+  margin-bottom: 0;
+}
+
+.card-page-domain-check {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.85rem 1rem;
+  margin-bottom: 1rem;
+}
+.card-page-domain-check-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin: 0 0 0.5rem 0;
+}
+.card-page-domain-check-line {
+  font-size: 0.85rem;
+  margin: 0.25rem 0;
+}
+.card-page-domain-check-line code {
+  font-size: 0.9em;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+}
+
 .card-page-demo-toggle {
   display: flex;
   align-items: center;

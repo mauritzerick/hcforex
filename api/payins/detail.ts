@@ -65,7 +65,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
       res.status(response.status).json(data);
       return;
     }
-    res.status(200).json(data);
+    // Normalize: Hello Clever detail may return { data: payin } or { payin: payin }; ensure we return flat payin
+    const payin = (data && (data.data ?? data.payin ?? data.payin_detail)) || data;
+    res.status(200).json(payin);
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Failed to load payin details';
     res.status(500).json({ error: message });

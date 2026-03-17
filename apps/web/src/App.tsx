@@ -161,7 +161,7 @@ function App() {
     setError(null);
   };
 
-  // For bank transfer (KRW/JPY): wait 10s then fetch payin detail so bank account info is shown
+  // For bank transfer (KRW/JPY): wait then fetch payin detail so bank account info is shown (JPY may take longer)
   useEffect(() => {
     if (
       step !== 'qr' ||
@@ -174,6 +174,7 @@ function App() {
     }
     const uuid = payin.uuid;
     const currency = selectedCurrency;
+    const delayMs = currency === 'JPY' ? 15_000 : 10_000;
     const t = setTimeout(async () => {
       try {
         const detail = await getPayinDetail(uuid, currency as PayinCurrency);
@@ -183,7 +184,7 @@ function App() {
       } finally {
         setBankDetailsLoading(false);
       }
-    }, 10_000);
+    }, delayMs);
     return () => clearTimeout(t);
   }, [step, payin?.uuid, selectedCurrency]);
   const handleBackToWithdraw = () => {
@@ -564,12 +565,21 @@ function App() {
                   {bankDetailsLoading ? (
                     <div className="bank-details-loading">
                       <p>Loading bank account details…</p>
-                      <p className="bank-details-loading-hint">Please wait about 10 seconds.</p>
+                      <p className="bank-details-loading-hint">
+                        {selectedCurrency === 'JPY' ? 'Please wait about 15 seconds.' : 'Please wait about 10 seconds.'}
+                      </p>
                     </div>
                   ) : (() => {
-                    const entries = Object.entries(payin.pay_code || {}).filter(
-                      ([key, value]) => key !== 'qr_string' && value != null && value !== ''
-                    );
+                    // Collect bank detail entries from pay_code and alternate keys (JPY may use payer_details, etc.)
+                    const toEntries = (obj: Record<string, unknown>): [string, unknown][] =>
+                      Object.entries(obj || {}).filter(
+                        ([k, v]) => v != null && v !== '' && k !== 'qr_string'
+                      ) as [string, unknown][];
+                    const fromPayCode = toEntries((payin.pay_code as Record<string, unknown>) || {});
+                    const payinAny = payin as unknown as Record<string, unknown>;
+                    const fromPayer = toEntries((payinAny.payer_details as Record<string, unknown>) || {});
+                    const fromBank = toEntries((payinAny.bank_account_info as Record<string, unknown>) || {});
+                    const entries = fromPayCode.length ? fromPayCode : [...fromPayer, ...fromBank];
                     return (
                       <>
                         <div className="bank-details">
@@ -579,7 +589,7 @@ function App() {
                                 {key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}
                               </span>
                               <span className="bank-detail-value">
-                                {typeof value === 'object'
+                                {typeof value === 'object' && value !== null
                                   ? JSON.stringify(value)
                                   : String(value)}
                               </span>
@@ -587,7 +597,25 @@ function App() {
                           ))}
                         </div>
                         {entries.length === 0 && (
-                          <p className="qr-hint">Bank details not yet available. Please try again in a moment or go back and retry.</p>
+                          <>
+                            <p className="qr-hint">Bank details not yet available.</p>
+                            <button
+                              type="button"
+                              className="btn btn-secondary btn-block"
+                              onClick={async () => {
+                                if (!payin?.uuid || !selectedCurrency || selectedCurrency === 'IDR' || selectedCurrency === 'VND') return;
+                                setBankDetailsLoading(true);
+                                try {
+                                  const detail = await getPayinDetail(payin.uuid, selectedCurrency as PayinCurrency);
+                                  setPayin(detail);
+                                } finally {
+                                  setBankDetailsLoading(false);
+                                }
+                              }}
+                            >
+                              Retry loading bank details
+                            </button>
+                          </>
                         )}
                         <p className="qr-hint">
                           Transfer the exact amount to the account above. Use the reference if required.
