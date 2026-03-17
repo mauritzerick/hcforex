@@ -97,6 +97,12 @@ const DEPOSIT_CONFIG: Record<
     placeholder: '15000',
     methodLabel: 'Bank transfer • kr_bank_krw',
   },
+  JPY: {
+    minAmount: 1000,
+    quickAmounts: [5000, 10000, 30000, 50000, 100000],
+    placeholder: '10000',
+    methodLabel: 'Bank transfer • jp_bank_jpy',
+  },
 };
 
 function App() {

@@ -4,7 +4,7 @@
 
 const API_BASE = import.meta.env.VITE_API_URL ?? '';
 
-export type PayinCurrency = 'IDR' | 'VND' | 'KRW';
+export type PayinCurrency = 'IDR' | 'VND' | 'KRW' | 'JPY';
 
 export interface PayinRequest {
   currency: string;

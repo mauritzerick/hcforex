@@ -16,7 +16,12 @@ const APP_IDS: Record<string, string> = {
   JPY: process.env.HELLOCLEVER_APP_ID_JPY ?? '',
 };
 
-const SECRET_KEY = process.env.HELLOCLEVER_SECRET_KEY ?? '';
+const SECRET_KEYS: Record<string, string> = {
+  IDR: process.env.HELLOCLEVER_SECRET_KEY_IDR ?? '',
+  VND: process.env.HELLOCLEVER_SECRET_KEY_VND ?? '',
+  KRW: process.env.HELLOCLEVER_SECRET_KEY_KRW ?? '',
+  JPY: process.env.HELLOCLEVER_SECRET_KEY_JPY ?? '',
+};
 
 /** Comma-separated list of allowed CORS origins, e.g. https://idr-brick.vercel.app */
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS ?? '')
@@ -29,17 +34,18 @@ export function getConfig() {
     port: Number(PORT),
     hellocleverBase: HELLOCLEVER_BASE,
     appIds: APP_IDS,
-    secretKey: SECRET_KEY,
+    secretKeys: SECRET_KEYS,
     allowedOrigins: ALLOWED_ORIGINS,
   };
 }
 
 export function getCredentials(currency: string): { appId: string; secretKey: string } {
   const appId = APP_IDS[currency];
-  if (!appId || !SECRET_KEY) {
+  const secretKey = SECRET_KEYS[currency];
+  if (!appId || !secretKey) {
     throw new Error(
-      'Missing Hello Clever credentials. In apps/api/.env set HELLOCLEVER_APP_ID_IDR (and HELLOCLEVER_APP_ID_VND/KRW/JPY if needed) and HELLOCLEVER_SECRET_KEY, then restart the API.'
+      `Missing Hello Clever credentials for ${currency}. In apps/api/.env set HELLOCLEVER_APP_ID_${currency} and HELLOCLEVER_SECRET_KEY_${currency}, then restart the API.`
     );
   }
-  return { appId, secretKey: SECRET_KEY };
+  return { appId, secretKey };
 }

@@ -22,12 +22,13 @@ type CreatePayinBody = {
 };
 
 function getCredentials(currency: string): { appId: string; secretKey: string } {
-  const envKey = `HELLOCLEVER_APP_ID_${currency}` as const;
-  const appId = process.env[envKey] ?? process.env.HELLOCLEVER_APP_ID_IDR ?? '';
-  const secretKey = process.env.HELLOCLEVER_SECRET_KEY ?? '';
+  const appIdKey = `HELLOCLEVER_APP_ID_${currency}`;
+  const secretKeyKey = `HELLOCLEVER_SECRET_KEY_${currency}`;
+  const appId = process.env[appIdKey] ?? '';
+  const secretKey = process.env[secretKeyKey] ?? '';
   if (!appId || !secretKey) {
     throw new Error(
-      'Missing Hello Clever credentials. In Vercel: set HELLOCLEVER_APP_ID_IDR (and VND/KRW/JPY if needed) and HELLOCLEVER_SECRET_KEY in Environment Variables.'
+      `Missing Hello Clever credentials for ${currency}. Set ${appIdKey} and ${secretKeyKey} in Vercel Environment Variables.`
     );
   }
   return { appId, secretKey };
