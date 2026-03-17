@@ -117,6 +117,10 @@ function App() {
   const [jpyUserId, setJpyUserId] = useState('mau');
   const [jpyUserName, setJpyUserName] = useState('User');
   const [jpyIpAddress, setJpyIpAddress] = useState('134.168.161.19');
+  const [jpyFirstName, setJpyFirstName] = useState('Mau');
+  const [jpyLastName, setJpyLastName] = useState('User');
+  const [jpyPhone, setJpyPhone] = useState('09012345678');
+  const [jpyEmail, setJpyEmail] = useState('mauritz.erick@gmail.com');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [payin, setPayin] = useState<PayinResponse | null>(null);
@@ -204,6 +208,10 @@ function App() {
           user_id: jpyUserId.trim() || 'mau',
           user_name: jpyUserName.trim() || 'User',
           ip_address: jpyIpAddress.trim() || '134.168.161.19',
+          first_name: jpyFirstName.trim() || 'Mau',
+          last_name: jpyLastName.trim() || 'User',
+          phone: jpyPhone.trim() || '09012345678',
+          email: jpyEmail.trim() || 'mauritz.erick@gmail.com',
         };
       }
       const res = await createPayin(num, depositCurrency, params);
@@ -418,6 +426,26 @@ function App() {
                     />
                   </label>
                   <label className="input-group">
+                    <span className="input-label">First name</span>
+                    <input
+                      type="text"
+                      value={jpyFirstName}
+                      onChange={(e) => setJpyFirstName(e.target.value)}
+                      className="input"
+                      placeholder="Mau"
+                    />
+                  </label>
+                  <label className="input-group">
+                    <span className="input-label">Last name</span>
+                    <input
+                      type="text"
+                      value={jpyLastName}
+                      onChange={(e) => setJpyLastName(e.target.value)}
+                      className="input"
+                      placeholder="User"
+                    />
+                  </label>
+                  <label className="input-group">
                     <span className="input-label">User name (remitter)</span>
                     <input
                       type="text"
@@ -425,6 +453,26 @@ function App() {
                       onChange={(e) => setJpyUserName(e.target.value)}
                       className="input"
                       placeholder="User"
+                    />
+                  </label>
+                  <label className="input-group">
+                    <span className="input-label">Phone</span>
+                    <input
+                      type="text"
+                      value={jpyPhone}
+                      onChange={(e) => setJpyPhone(e.target.value)}
+                      className="input"
+                      placeholder="09012345678"
+                    />
+                  </label>
+                  <label className="input-group">
+                    <span className="input-label">Email</span>
+                    <input
+                      type="email"
+                      value={jpyEmail}
+                      onChange={(e) => setJpyEmail(e.target.value)}
+                      className="input"
+                      placeholder="mauritz.erick@gmail.com"
                     />
                   </label>
                   <label className="input-group">

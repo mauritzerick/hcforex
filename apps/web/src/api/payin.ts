@@ -81,6 +81,10 @@ export interface PayinJpyParams {
   user_id?: string;
   user_name?: string;
   ip_address?: string;
+  first_name?: string;
+  last_name?: string;
+  phone?: string;
+  email?: string;
 }
 
 export async function createPayin(

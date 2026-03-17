@@ -19,7 +19,15 @@ type CreatePayinBody = {
   amount: number;
   vndParams?: { phone?: string; ip_address?: string };
   krwParams?: { user_name?: string };
-  jpyParams?: { user_id?: string; user_name?: string; ip_address?: string };
+  jpyParams?: {
+    user_id?: string;
+    user_name?: string;
+    ip_address?: string;
+    first_name?: string;
+    last_name?: string;
+    phone?: string;
+    email?: string;
+  };
 };
 
 function getCredentials(currency: string): { appId: string; secretKey: string } {
@@ -84,6 +92,10 @@ function buildPayinBody(body: CreatePayinBody): Record<string, unknown> {
         user_id: jpyParams?.user_id ?? 'mau',
         user_name: jpyParams?.user_name ?? 'User',
         ip_address: jpyParams?.ip_address ?? '134.168.161.19',
+        first_name: jpyParams?.first_name ?? 'Mau',
+        last_name: jpyParams?.last_name ?? 'User',
+        phone: jpyParams?.phone ?? '09012345678',
+        email: jpyParams?.email ?? base.email,
       },
     };
   }
