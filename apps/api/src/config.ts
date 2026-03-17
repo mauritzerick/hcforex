@@ -18,12 +18,19 @@ const APP_IDS: Record<string, string> = {
 
 const SECRET_KEY = process.env.HELLOCLEVER_SECRET_KEY ?? '';
 
+/** Comma-separated list of allowed CORS origins, e.g. https://idr-brick.vercel.app */
+const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS ?? '')
+  .split(',')
+  .map((o) => o.trim())
+  .filter(Boolean);
+
 export function getConfig() {
   return {
     port: Number(PORT),
     hellocleverBase: HELLOCLEVER_BASE,
     appIds: APP_IDS,
     secretKey: SECRET_KEY,
+    allowedOrigins: ALLOWED_ORIGINS,
   };
 }
 

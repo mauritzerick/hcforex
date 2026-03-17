@@ -6,6 +6,7 @@ const app = express();
 
 app.use(express.json());
 
+const config = getConfig();
 const allowedOrigins = [
   'http://localhost:5173',
   'http://127.0.0.1:5173',
@@ -22,11 +23,18 @@ const allowedOrigins = [
   'https://digital-core.us:5173',
   'https://digital-core.us:5174',
   'https://digital-core.us:5175',
+  ...config.allowedOrigins,
 ];
 const localhostOrigin = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
+const vercelOrigin = /^https:\/\/[a-z0-9-]+\.vercel\.app$/;
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  if (origin && (allowedOrigins.includes(origin) || localhostOrigin.test(origin))) {
+  if (
+    origin &&
+    (allowedOrigins.includes(origin) ||
+      localhostOrigin.test(origin) ||
+      vercelOrigin.test(origin))
+  ) {
     res.setHeader('Access-Control-Allow-Origin', origin);
   }
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -54,7 +62,7 @@ app.get('/api', (req, res) => {
   res.json({ ok: true, endpoints: ['POST /api/payins'] });
 });
 
-const { port } = getConfig();
+const { port } = config;
 app.listen(port, '0.0.0.0', () => {
   console.log(`API listening on http://localhost:${port}`);
 });
