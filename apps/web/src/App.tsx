@@ -5,6 +5,7 @@ import {
   type PayinCurrency,
   type PayinVndParams,
   type PayinKrwParams,
+  type PayinJpyParams,
   payinHasQr,
 } from './api/payin';
 import {
@@ -113,6 +114,7 @@ function App() {
   const [vndPhone, setVndPhone] = useState('0123456789');
   const [vndIpAddress, setVndIpAddress] = useState('134.168.161.19');
   const [krwUserName, setKrwUserName] = useState('Jeon');
+  const [jpyUserName, setJpyUserName] = useState('User');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [payin, setPayin] = useState<PayinResponse | null>(null);
@@ -187,7 +189,7 @@ function App() {
     setLoading(true);
     setError(null);
     try {
-      let params: PayinVndParams | PayinKrwParams | undefined;
+      let params: PayinVndParams | PayinKrwParams | PayinJpyParams | undefined;
       if (depositCurrency === 'VND') {
         params = {
           phone: vndPhone.trim() || '0123456789',
@@ -195,6 +197,8 @@ function App() {
         };
       } else if (depositCurrency === 'KRW') {
         params = { user_name: krwUserName.trim() || 'Jeon' };
+      } else if (depositCurrency === 'JPY') {
+        params = { user_name: jpyUserName.trim() || 'User' };
       }
       const res = await createPayin(num, depositCurrency, params);
       setPayin(res);
@@ -392,6 +396,18 @@ function App() {
                     onChange={(e) => setKrwUserName(e.target.value)}
                     className="input"
                     placeholder="Jeon"
+                  />
+                </label>
+              )}
+              {selectedCurrency === 'JPY' && (
+                <label className="input-group">
+                  <span className="input-label">User name (remitter)</span>
+                  <input
+                    type="text"
+                    value={jpyUserName}
+                    onChange={(e) => setJpyUserName(e.target.value)}
+                    className="input"
+                    placeholder="User"
                   />
                 </label>
               )}

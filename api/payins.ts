@@ -19,6 +19,7 @@ type CreatePayinBody = {
   amount: number;
   vndParams?: { phone?: string; ip_address?: string };
   krwParams?: { user_name?: string };
+  jpyParams?: { user_name?: string };
 };
 
 function getCredentials(currency: string): { appId: string; secretKey: string } {
@@ -35,7 +36,7 @@ function getCredentials(currency: string): { appId: string; secretKey: string } 
 }
 
 function buildPayinBody(body: CreatePayinBody): Record<string, unknown> {
-  const { currency, amount, vndParams, krwParams } = body;
+  const { currency, amount, vndParams, krwParams, jpyParams } = body;
   const base = {
     currency,
     amount,
@@ -79,7 +80,9 @@ function buildPayinBody(body: CreatePayinBody): Record<string, unknown> {
     return {
       ...base,
       payin_method_name: 'jp_bank_jpy',
-      payin_method_params: {},
+      payin_method_params: {
+        user_name: jpyParams?.user_name ?? 'User',
+      },
     };
   }
   throw new Error(`Unsupported currency: ${currency}`);

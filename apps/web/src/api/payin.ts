@@ -77,10 +77,14 @@ export interface PayinKrwParams {
   user_name: string;
 }
 
+export interface PayinJpyParams {
+  user_name: string;
+}
+
 export async function createPayin(
   amount: number,
   currency: PayinCurrency,
-  params?: PayinVndParams | PayinKrwParams
+  params?: PayinVndParams | PayinKrwParams | PayinJpyParams
 ): Promise<PayinResponse> {
   const body: Record<string, unknown> = {
     currency,
@@ -92,6 +96,9 @@ export async function createPayin(
   if (currency === 'KRW' && params) {
     body.krwParams = params;
   }
+  if (currency === 'JPY' && params) {
+    body.jpyParams = params;
+  }
 
   const res = await fetch(`${API_BASE}/api/payins`, {
     method: 'POST',
@@ -101,7 +108,14 @@ export async function createPayin(
 
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const msg = typeof data.error === 'string' ? data.error : `Payin failed: ${res.status}`;
+    const msg =
+      typeof data.error === 'string'
+        ? data.error
+        : typeof data.message === 'string'
+          ? data.message
+          : data.errors
+            ? JSON.stringify(data.errors)
+            : `Payin failed: ${res.status}`;
     throw new Error(msg);
   }
   return data as PayinResponse;
