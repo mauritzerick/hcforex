@@ -1,0 +1,19 @@
+{
+  "name": "idr-brick",
+  "private": true,
+  "version": "0.0.0",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev --workspace=@idr-brick/web\" \"npm run dev --workspace=@idr-brick/api\"",
+    "dev:web": "npm run dev --workspace=@idr-brick/web",
+    "dev:api": "npm run dev --workspace=@idr-brick/api",
+    "build": "npm run build --workspaces",
+    "build:web": "npm run build --workspace=@idr-brick/web",
+    "build:api": "npm run build --workspace=@idr-brick/api"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}
