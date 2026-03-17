@@ -17,7 +17,7 @@ export interface CreatePayinBody {
   amount: number;
   vndParams?: { phone?: string; ip_address?: string };
   krwParams?: { user_name?: string };
-  jpyParams?: { user_name?: string };
+  jpyParams?: { user_id?: string; user_name?: string };
 }
 
 function buildPayinBody(body: CreatePayinBody): Record<string, unknown> {
@@ -69,6 +69,7 @@ function buildPayinBody(body: CreatePayinBody): Record<string, unknown> {
       ...base,
       payin_method_name: 'jp_bank_jpy',
       payin_method_params: {
+        user_id: jpyParams?.user_id ?? 'mau',
         user_name: jpyParams?.user_name ?? 'User',
       },
     };

@@ -78,7 +78,8 @@ export interface PayinKrwParams {
 }
 
 export interface PayinJpyParams {
-  user_name: string;
+  user_id?: string;
+  user_name?: string;
 }
 
 export async function createPayin(

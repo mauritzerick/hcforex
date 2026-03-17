@@ -114,6 +114,7 @@ function App() {
   const [vndPhone, setVndPhone] = useState('0123456789');
   const [vndIpAddress, setVndIpAddress] = useState('134.168.161.19');
   const [krwUserName, setKrwUserName] = useState('Jeon');
+  const [jpyUserId, setJpyUserId] = useState('mau');
   const [jpyUserName, setJpyUserName] = useState('User');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -198,7 +199,7 @@ function App() {
       } else if (depositCurrency === 'KRW') {
         params = { user_name: krwUserName.trim() || 'Jeon' };
       } else if (depositCurrency === 'JPY') {
-        params = { user_name: jpyUserName.trim() || 'User' };
+        params = { user_id: jpyUserId.trim() || 'mau', user_name: jpyUserName.trim() || 'User' };
       }
       const res = await createPayin(num, depositCurrency, params);
       setPayin(res);
@@ -400,16 +401,28 @@ function App() {
                 </label>
               )}
               {selectedCurrency === 'JPY' && (
-                <label className="input-group">
-                  <span className="input-label">User name (remitter)</span>
-                  <input
-                    type="text"
-                    value={jpyUserName}
-                    onChange={(e) => setJpyUserName(e.target.value)}
-                    className="input"
-                    placeholder="User"
-                  />
-                </label>
+                <>
+                  <label className="input-group">
+                    <span className="input-label">User ID</span>
+                    <input
+                      type="text"
+                      value={jpyUserId}
+                      onChange={(e) => setJpyUserId(e.target.value)}
+                      className="input"
+                      placeholder="mau"
+                    />
+                  </label>
+                  <label className="input-group">
+                    <span className="input-label">User name (remitter)</span>
+                    <input
+                      type="text"
+                      value={jpyUserName}
+                      onChange={(e) => setJpyUserName(e.target.value)}
+                      className="input"
+                      placeholder="User"
+                    />
+                  </label>
+                </>
               )}
               {error && <p className="error">{error}</p>}
               <button
