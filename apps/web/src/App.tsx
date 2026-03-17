@@ -116,6 +116,7 @@ function App() {
   const [krwUserName, setKrwUserName] = useState('Jeon');
   const [jpyUserId, setJpyUserId] = useState('mau');
   const [jpyUserName, setJpyUserName] = useState('User');
+  const [jpyIpAddress, setJpyIpAddress] = useState('134.168.161.19');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [payin, setPayin] = useState<PayinResponse | null>(null);
@@ -199,7 +200,11 @@ function App() {
       } else if (depositCurrency === 'KRW') {
         params = { user_name: krwUserName.trim() || 'Jeon' };
       } else if (depositCurrency === 'JPY') {
-        params = { user_id: jpyUserId.trim() || 'mau', user_name: jpyUserName.trim() || 'User' };
+        params = {
+          user_id: jpyUserId.trim() || 'mau',
+          user_name: jpyUserName.trim() || 'User',
+          ip_address: jpyIpAddress.trim() || '134.168.161.19',
+        };
       }
       const res = await createPayin(num, depositCurrency, params);
       setPayin(res);
@@ -420,6 +425,16 @@ function App() {
                       onChange={(e) => setJpyUserName(e.target.value)}
                       className="input"
                       placeholder="User"
+                    />
+                  </label>
+                  <label className="input-group">
+                    <span className="input-label">IP address</span>
+                    <input
+                      type="text"
+                      value={jpyIpAddress}
+                      onChange={(e) => setJpyIpAddress(e.target.value)}
+                      className="input"
+                      placeholder="134.168.161.19"
                     />
                   </label>
                 </>

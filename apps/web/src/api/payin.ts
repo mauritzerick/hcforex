@@ -80,6 +80,7 @@ export interface PayinKrwParams {
 export interface PayinJpyParams {
   user_id?: string;
   user_name?: string;
+  ip_address?: string;
 }
 
 export async function createPayin(
