@@ -65,6 +65,8 @@ export function CardPage() {
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
   const [callbackMessage, setCallbackMessage] = useState<string | null>(null);
+  const [cardToken, setCardToken] = useState<{ id: string; type: string } | null>(null);
+  const [cardFormReady, setCardFormReady] = useState(false);
   const mountRef = useRef<HTMLDivElement>(null);
 
   const appId = import.meta.env.VITE_GETKOLLO_APP_ID as string | undefined;
@@ -99,6 +101,7 @@ export function CardPage() {
     setForm((prev) => ({ ...prev, ...updates }));
     setCreateError(null);
     setCallbackMessage(null);
+    setCardToken(null);
   };
 
   const handleCreatePayment = async () => {
@@ -126,9 +129,11 @@ export function CardPage() {
       return;
     }
 
-    setCreating(true);
+      setCreating(true);
     setCreateError(null);
     setCallbackMessage(null);
+    setCardToken(null);
+    setCardFormReady(false);
 
     try {
       const getKolloSDK = new window.GetKollo({ app_id: appId });
@@ -153,12 +158,18 @@ export function CardPage() {
           frame: { width: '100%', height: '100%' },
         },
         events: {
-          onReady: () => setCallbackMessage('Form ready for input'),
+          onReady: () => {
+            setCallbackMessage('Form ready for input');
+            setCardFormReady(true);
+          },
           onLoading: (isLoading) => setCallbackMessage(isLoading ? 'Loading…' : null),
         },
       };
 
       window.getkolloCardCallback = (message: GetKolloCallbackResponse) => {
+        if (message?.token?.id) {
+          setCardToken({ id: message.token.id, type: message.token.type || 'card' });
+        }
         if (message?.status !== 'succeeded') {
           const err = message?.error;
           const msg = err?.code === 'card_init_timeout'
@@ -324,15 +335,45 @@ export function CardPage() {
         </div>
 
         <div className="get-kollo-wrap" ref={mountRef}>
-          <p className="get-kollo-label">Card iframe mount</p>
+          <p className="get-kollo-label">
+            {creating ? 'Loading card form…' : cardFormReady ? 'Card form' : 'Card iframe mount'}
+          </p>
           {demoMode ? (
             <div className="get-kollo get-kollo-demo">
               Demo mode — card iframe would appear here when the domain is authorized (e.g. digital-core.us or whitelisted localhost).
             </div>
           ) : (
-            <div className="get-kollo" />
+            <div className="get-kollo get-kollo-mount">
+              {!cardFormReady && !creating && (
+                <span className="get-kollo-placeholder">Click &quot;Initialize SDK & create payment&quot; above to load the card form.</span>
+              )}
+            </div>
           )}
         </div>
+
+        {cardToken && (
+          <div className="card-page-token">
+            <p className="card-page-token-title">Token (for reuse)</p>
+            <p className="card-page-token-hint">Use this with Create Payment via Tokenisation API for future payments without re-entering card details.</p>
+            <div className="card-page-token-fields">
+              <div className="card-page-token-row">
+                <span className="card-page-token-label">id</span>
+                <code className="card-page-token-value">{cardToken.id}</code>
+                <button
+                  type="button"
+                  className="btn btn-secondary card-page-token-copy"
+                  onClick={() => navigator.clipboard?.writeText(cardToken.id)}
+                >
+                  Copy
+                </button>
+              </div>
+              <div className="card-page-token-row">
+                <span className="card-page-token-label">type</span>
+                <code className="card-page-token-value">{cardToken.type}</code>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );

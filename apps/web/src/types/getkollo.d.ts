@@ -26,6 +26,8 @@ declare global {
     error?: { message?: string; code?: string };
     order?: GetKolloOrder;
     type?: 'callback';
+    /** Present when payment reaches authorised/waiting — use for tokenisation (reuse without re-entering card) */
+    token?: { id: string; type: string };
   }
 
   interface GetKolloInstance {
