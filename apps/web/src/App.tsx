@@ -117,8 +117,8 @@ function App() {
   const [jpyUserId, setJpyUserId] = useState('mau');
   const [jpyUserName, setJpyUserName] = useState('User');
   const [jpyIpAddress, setJpyIpAddress] = useState('134.168.161.19');
-  const [jpyFirstName, setJpyFirstName] = useState('Mau');
-  const [jpyLastName, setJpyLastName] = useState('User');
+  const [jpyFirstName, setJpyFirstName] = useState('マウリッツ');
+  const [jpyLastName, setJpyLastName] = useState('エリック');
   const [jpyPhone, setJpyPhone] = useState('09012345678');
   const [jpyEmail, setJpyEmail] = useState('mauritz.erick@gmail.com');
   const [loading, setLoading] = useState(false);
@@ -208,8 +208,8 @@ function App() {
           user_id: jpyUserId.trim() || 'mau',
           user_name: jpyUserName.trim() || 'User',
           ip_address: jpyIpAddress.trim() || '134.168.161.19',
-          first_name: jpyFirstName.trim() || 'Mau',
-          last_name: jpyLastName.trim() || 'User',
+          first_name: jpyFirstName.trim() || 'マウリッツ',
+          last_name: jpyLastName.trim() || 'エリック',
           phone: jpyPhone.trim() || '09012345678',
           email: jpyEmail.trim() || 'mauritz.erick@gmail.com',
         };
@@ -426,23 +426,23 @@ function App() {
                     />
                   </label>
                   <label className="input-group">
-                    <span className="input-label">First name</span>
+                    <span className="input-label">First name (Katakana)</span>
                     <input
                       type="text"
                       value={jpyFirstName}
                       onChange={(e) => setJpyFirstName(e.target.value)}
                       className="input"
-                      placeholder="Mau"
+                      placeholder="マウリッツ"
                     />
                   </label>
                   <label className="input-group">
-                    <span className="input-label">Last name</span>
+                    <span className="input-label">Last name (Katakana)</span>
                     <input
                       type="text"
                       value={jpyLastName}
                       onChange={(e) => setJpyLastName(e.target.value)}
                       className="input"
-                      placeholder="User"
+                      placeholder="エリック"
                     />
                   </label>
                   <label className="input-group">
