@@ -290,7 +290,7 @@ function App() {
         </nav>
       </header>
 
-      <main className="main">
+      <main className={page === 'card' ? 'main main--card' : 'main'}>
         {page === 'card' && <CardPage />}
 
         {page === 'forex' && step === 'currency-select' && (

@@ -1,7 +1,8 @@
 .card-page {
   width: 100%;
-  max-width: 520px;
-  margin: 0 auto;
+  max-width: none;
+  margin: 0;
+  padding: 0;
 }
 
 .card-page .card-form-card,
@@ -131,7 +132,7 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   padding: 1rem;
-  min-height: 360px;
+  min-height: calc(100vh - 140px);
 }
 
 .get-kollo-label {
@@ -145,8 +146,8 @@
 
 .get-kollo {
   width: 100%;
-  min-height: 320px;
-  height: 320px;
+  min-height: 520px;
+  height: calc(100vh - 220px);
   background: var(--surface);
   border: 1px dashed var(--border-strong);
   border-radius: var(--radius-sm);
