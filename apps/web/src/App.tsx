@@ -712,6 +712,18 @@ function App() {
               ← Back
             </button>
             <div className="flow-card qr-card">
+              <div
+                className={`thank-you-burst ${selectedCurrency === 'VND' ? 'vnd' : ''}`}
+                aria-hidden
+              >
+                {Array.from({ length: 14 }).map((_, i) => (
+                  <span
+                    key={i}
+                    className="thank-you-piece"
+                    data-i={i}
+                  />
+                ))}
+              </div>
               <h1>Payment received</h1>
               <p className="subtitle">
                 Thanks! Your {selectedCurrency} deposit has been confirmed.
