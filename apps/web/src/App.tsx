@@ -24,7 +24,7 @@ export type Currency = 'IDR' | 'VND' | 'KRW' | 'MYR' | 'JPY' | 'AUD' | 'INR' | '
 
 const CURRENCIES: Currency[] = ['IDR', 'VND', 'KRW', 'MYR', 'JPY', 'AUD', 'INR', 'ARS'];
 
-type Step = 'currency-select' | 'dashboard' | 'amount' | 'qr' | 'withdraw' | 'withdraw-preview';
+type Step = 'currency-select' | 'dashboard' | 'amount' | 'qr' | 'thank-you' | 'withdraw' | 'withdraw-preview';
 type Page = 'forex' | 'card';
 
 const BALANCES: Record<Currency, number> = {
@@ -186,6 +186,63 @@ function App() {
       }
     }, delayMs);
     return () => clearTimeout(t);
+  }, [step, payin?.uuid, selectedCurrency]);
+
+  // When the payment becomes successful, show a thank-you page.
+  // Note: Hello Clever sends webhooks server-to-server; our UI switches pages by polling payin detail.
+  useEffect(() => {
+    if (step !== 'qr' || !payin || !selectedCurrency) return;
+    if (!payin.uuid) return;
+
+    const uuid = payin.uuid;
+    const currency = selectedCurrency as PayinCurrency;
+
+    let cancelled = false;
+    const maxMs = 120_000; // stop polling after ~2 minutes
+    const intervalMs = 5_000;
+    const startedAt = Date.now();
+
+    const check = async () => {
+      try {
+        const detail = await getPayinDetail(uuid, currency);
+        if (cancelled) return;
+        setPayin(detail);
+
+        const s = ((detail.status ?? detail.status_text ?? '') as string).toLowerCase();
+        // Hello Clever may report different "success" states depending on payment type/currency.
+        const isSuccess =
+          s === 'received' ||
+          s === 'succeeded' ||
+          s === 'paid' ||
+          s === 'authorised' ||
+          s === 'authorized' ||
+          s === 'waiting';
+        if (isSuccess) {
+          setBankDetailsLoading(false);
+          setStep('thank-you');
+        }
+      } catch {
+        // Ignore transient errors; polling will retry.
+      }
+    };
+
+    // run immediately
+    void check();
+
+    const t = setInterval(() => {
+      if (Date.now() - startedAt >= maxMs) return;
+      void check();
+    }, intervalMs);
+
+    const hardStop = setTimeout(() => {
+      if (!cancelled) clearInterval(t);
+    }, maxMs + 50);
+
+    return () => {
+      cancelled = true;
+      clearInterval(t);
+      clearTimeout(hardStop);
+    };
   }, [step, payin?.uuid, selectedCurrency]);
   const handleBackToWithdraw = () => {
     setStep('withdraw');
@@ -639,6 +696,48 @@ function App() {
                   <span>{new Date(payin.expired_at).toLocaleString()}</span>
                 </div>
               </div>
+            </div>
+          </section>
+        )}
+
+        {page === 'forex' && step === 'thank-you' && payin && selectedCurrency && (
+          <section className="deposit-flow qr-step">
+            <button
+              type="button"
+              className="back"
+              onClick={() => {
+                setStep('currency-select');
+                setPayin(null);
+                setQrDataUrl(null);
+                setBankDetailsLoading(false);
+                setError(null);
+              }}
+              aria-label="Back"
+            >
+              ← Back
+            </button>
+            <div className="flow-card qr-card">
+              <h1>Payment received</h1>
+              <p className="subtitle">
+                Thanks! Your {selectedCurrency} deposit has been confirmed.
+              </p>
+              <div className="bank-details" style={{ maxWidth: 420 }}>
+                <div className="bank-detail-row">
+                  <span className="bank-detail-label">Reference</span>
+                  <span className="bank-detail-value">{payin.uuid}</span>
+                </div>
+                <div className="bank-detail-row">
+                  <span className="bank-detail-label">Amount</span>
+                  <span className="bank-detail-value">
+                    {formatCurrency(Number(payin.amount), selectedCurrency)}
+                  </span>
+                </div>
+                <div className="bank-detail-row">
+                  <span className="bank-detail-label">Status</span>
+                  <span className="bank-detail-value">{payin.status_text ?? payin.status}</span>
+                </div>
+              </div>
+              <p className="qr-hint">You can now close this tab or start a new deposit.</p>
             </div>
           </section>
         )}
