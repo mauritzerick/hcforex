@@ -209,14 +209,9 @@ function App() {
         setPayin(detail);
 
         const s = ((detail.status ?? detail.status_text ?? '') as string).toLowerCase();
-        // Hello Clever may report different "success" states depending on payment type/currency.
-        const isSuccess =
-          s === 'received' ||
-          s === 'succeeded' ||
-          s === 'paid' ||
-          s === 'authorised' ||
-          s === 'authorized' ||
-          s === 'waiting';
+        // Per Hello Clever docs: payin detail status values include:
+        // pending | received | expired | return_pending | return_received | return_expired
+        const isSuccess = s === 'received' || s === 'return_received';
         if (isSuccess) {
           setBankDetailsLoading(false);
           setStep('thank-you');
